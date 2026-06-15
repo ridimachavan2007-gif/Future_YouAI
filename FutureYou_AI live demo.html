@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FutureYou AI</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #020617);
+      color: white;
+    }
+
+    header {
+      text-align: center;
+      padding: 25px;
+      font-size: 32px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      padding: 25px;
+      border-radius: 20px;
+      width: 340px;
+      box-shadow: 0 0 30px rgba(56,189,248,0.15);
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(56,189,248,0.3);
+    }
+
+    h3 {
+      margin-bottom: 15px;
+      color: #38bdf8;
+    }
+
+    input {
+      width: 92%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #38bdf8;
+    }
+
+    .bar {
+      height: 12px;
+      background: #020617;
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 12px;
+      background: linear-gradient(90deg, #22c55e, #38bdf8);
+      border-radius: 10px;
+      width: 0%;
+      transition: width 1s ease-in-out;
+    }
+
+    .good { color: #22c55e; }
+    .avg { color: #facc15; }
+    .bad { color: #ef4444; }
+
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>🔮 FutureYou AI</header>
+
+<div class="container">
+
+  <!-- INPUT -->
+  <div class="card">
+    <h3>Enter Your Details</h3>
+
+    <input type="number" id="study" placeholder="📚 Study Hours">
+    <input type="number" id="screen" placeholder="📱 Screen Time">
+    <input type="number" id="sleep" placeholder="😴 Sleep Hours">
+    <input type="text" id="lang" placeholder="💻 Coding Language">
+
+    <input type="text" id="hobby" placeholder="🎨 Your Hobby (e.g. gaming, music)">
+    <input type="text" id="domain" placeholder="🚀 Interested Domain (AI, Web, Cybersecurity)">
+
+    <button onclick="analyze()">Analyze Future 🚀</button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="card" id="result"></div>
+
+</div>
+
+<script>
+let chart;
+
+function analyze() {
+
+  let study = parseInt(document.getElementById("study").value) || 0;
+  let screen = parseInt(document.getElementById("screen").value) || 0;
+  let sleep = parseInt(document.getElementById("sleep").value) || 0;
+  let lang = document.getElementById("lang").value.toLowerCase();
+  let hobby = document.getElementById("hobby").value.toLowerCase();
+  let domain = document.getElementById("domain").value.toLowerCase();
+
+  let score = study * 12 + sleep * 8 - screen * 10;
+  score = Math.max(0, Math.min(100, score));
+
+  let status = "", mindset = "", future = "";
+
+  if (score >= 75) {
+    status = "<span class='good'>🌟 Excellent</span>";
+    mindset = "You are disciplined. Maintain balance.";
+    future = "You are likely to achieve strong career growth.";
+  } 
+  else if (score >= 50) {
+    status = "<span class='avg'>⚖️ Average</span>";
+    mindset = "Improve consistency for better results.";
+    future = "You can reach success with more focus.";
+  } 
+  else {
+    status = "<span class='bad'>⚠️ Needs Improvement</span>";
+    mindset = "Start small and build habits.";
+    future = "Your current habits may slow your growth.";
+  }
+
+  // Career suggestion
+  let career = "";
+
+  if (domain.includes("ai") || lang.includes("python")) {
+    career = "AI Engineer / Data Scientist";
+  } 
+  else if (domain.includes("web") || lang.includes("javascript")) {
+    career = "Frontend / Full Stack Developer";
+  } 
+  else if (domain.includes("cyber")) {
+    career = "Cybersecurity Analyst";
+  } 
+  else {
+    career = "Explore multiple tech domains";
+  }
+
+  // Hobby insight
+  let hobbyInsight = "";
+  if (hobby.includes("gaming")) {
+    hobbyInsight = "Gaming improves reflex but control time.";
+  } 
+  else if (hobby.includes("music")) {
+    hobbyInsight = "Music boosts creativity and focus.";
+  } 
+  else if (hobby.includes("reading")) {
+    hobbyInsight = "Reading improves knowledge and thinking.";
+  } 
+  else {
+    hobbyInsight = "Your hobby helps balance your lifestyle.";
+  }
+
+  document.getElementById("result").innerHTML = `
+    <h3>📊 Analysis</h3>
+    <p>Status: ${status}</p>
+    <p>Score: ${score}/100</p>
+
+    <div class="bar">
+      <div class="fill" id="progress"></div>
+    </div>
+
+    <canvas id="myChart"></canvas>
+
+    <h3>🔮 Future</h3>
+    <p>${future}</p>
+
+    <h3>🎯 Career</h3>
+    <p>${career}</p>
+
+    <h3>🎨 Hobby Insight</h3>
+    <p>${hobbyInsight}</p>
+
+    <h3>🧠 Mindset</h3>
+    <p>${mindset}</p>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("progress").style.width = score + "%";
+  }, 200);
+
+  // BAR CHART
+  if (chart) chart.destroy();
+
+  const ctx = document.getElementById("myChart").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Study Hours", "Sleep Hours", "Screen Time"],
+      datasets: [{
+        label: "Your Habits",
+        data: [study, sleep, screen]
+      }]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+}
+</script>
+
+</body>
+</html>
